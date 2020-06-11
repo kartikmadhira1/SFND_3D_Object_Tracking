@@ -152,7 +152,11 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
 }
 
 
-void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bbBestMatches, DataFrame &prevFrame, DataFrame &currFrame)
-{
-    // ...
+void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bbBestMatches, DataFrame &prevFrame, DataFrame &currFrame) {
+    for (auto &each_match : matches)  {
+        cout << each_match.queryIdx << "\n";
+        cout << each_match.imgIdx << "\n";
+        cout << each_match.trainIdx << "\n";
+
+    }   
 }
