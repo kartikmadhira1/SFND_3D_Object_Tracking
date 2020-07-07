@@ -174,17 +174,41 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
 
 
 void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bbBestMatches, DataFrame &prevFrame, DataFrame &currFrame) {
-    for (auto &each_match : matches)  {
-        for (auto &each_box : currFrame.boundingBoxes) {
-            if (bbBestMatches.find(each_box.boxID) == bbBestMatches.end()) {
-                if (each_box.roi.contains(currFrame.keypoints[each_match.trainIdx].pt)) {
-                    for (auto &each_prev_box : prevFrame.boundingBoxes) {
-                        if (each_prev_box.roi.contains(prevFrame.keypoints[each_match.queryIdx].pt)) {
-                            bbBestMatches[each_box.boxID] = each_prev_box.boxID; 
-                        }
-                    }
+    // For each of the matches between the frames
+    // for (auto &each_match : matches)  {
+    //     // For every frame in the bounding box for current frame
+    //     for (auto &each_box : currFrame.boundingBoxes) {
+    //         if (bbBestMatches.find(each_box.boxID) == bbBestMatches.end()) {
+    //             if (each_box.roi.contains(currFrame.keypoints[each_match.trainIdx].pt)) {
+    //                 for (auto &each_prev_box : prevFrame.boundingBoxes) {
+    //                     if (each_prev_box.roi.contains(prevFrame.keypoints[each_match.queryIdx].pt)) {
+    //                         bbBestMatches[each_box.boxID] = each_prev_box.boxID; 
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }  
+    for (auto each_match : matches) {
+        std::map<int, int> queryIds;
+        for (auto each_curr_box : currFrame.boundingBoxes) {
+            if (each_curr_box.roi.contains(currFrame.keypoints[each_match.trainIdx].pt)) {
+                bbBestMatches[each_curr_box.boxID] = -1;
+                queryIds[each_match.queryIdx] = each_curr_box.boxID;
+            }
+        }
+
+        for (auto each_prev_box : prevFrame.boundingBoxes) {
+            if (each_prev_box.roi.contains(prevFrame.keypoints[each_match.queryIdx].pt)) {
+                // bbBestMatches[each_prev_box.boxID] = -1;
+                if (queryIds.find(each_match.queryIdx) != queryIds.end()) {
+                    bbBestMatches[queryIds[each_match.queryIdx]] = each_prev_box.boxID;
                 }
             }
         }
-    }   
+        
+    }
+
+
+
 }
