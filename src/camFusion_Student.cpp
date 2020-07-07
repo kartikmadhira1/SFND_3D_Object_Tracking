@@ -193,7 +193,7 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
         std::map<int, int> queryIds;
         for (auto each_curr_box : currFrame.boundingBoxes) {
             if (each_curr_box.roi.contains(currFrame.keypoints[each_match.trainIdx].pt)) {
-                bbBestMatches[each_curr_box.boxID] = -1;
+                // bbBestMatches[each_curr_box.boxID] = -1;
                 queryIds[each_match.queryIdx] = each_curr_box.boxID;
             }
         }
@@ -206,7 +206,7 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
                 }
             }
         }
-        
+
     }
 
 
