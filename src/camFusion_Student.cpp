@@ -189,24 +189,52 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
     //         }
     //     }
     // }  
-    for (auto each_match : matches) {
-        std::map<int, int> queryIds;
-        for (auto each_curr_box : currFrame.boundingBoxes) {
-            if (each_curr_box.roi.contains(currFrame.keypoints[each_match.trainIdx].pt)) {
-                // bbBestMatches[each_curr_box.boxID] = -1;
-                queryIds[each_match.queryIdx] = each_curr_box.boxID;
+    int prevSize = prevFrame.boundingBoxes.size();
+    int currSize = currFrame.boundingBoxes.size();
+
+    int matchMatrix[currSize][prevSize] = { };
+
+    // For every match, create a currID -> prevID matrix where
+    // matrix[currID][prevID] represents number of keypoints matches
+    // for that particular pair.
+    for (auto eachMatch : matches) {
+        // std::map<int, int> queryIds;
+        int currID = -1;
+        int prevID = -1;
+        
+        for (auto eachCurrBox : currFrame.boundingBoxes) {
+            if (eachCurrBox.roi.contains(currFrame.keypoints[eachMatch.trainIdx].pt)) {
+                currID = eachCurrBox.boxID;
             }
         }
 
-        for (auto each_prev_box : prevFrame.boundingBoxes) {
-            if (each_prev_box.roi.contains(prevFrame.keypoints[each_match.queryIdx].pt)) {
-                // bbBestMatches[each_prev_box.boxID] = -1;
-                if (queryIds.find(each_match.queryIdx) != queryIds.end()) {
-                    bbBestMatches[queryIds[each_match.queryIdx]] = each_prev_box.boxID;
-                }
+        for (auto eachPrevBox : prevFrame.boundingBoxes) {
+            if (eachPrevBox.roi.contains(prevFrame.keypoints[eachMatch.queryIdx].pt)) {
+                // bbBestMatches[each_prev_box.boxID] =. -1;
+                // if (queryIds.find(eachMatch.queryIdx) != queryIds.end()) {
+                    //  = eachPrevBox.boxID;
+                // }
+                prevID = eachPrevBox.boxID;
             }
         }
 
+
+        if ((currID != -1) && (prevID != -1)) {
+            matchMatrix[currID][prevID]++;
+        }
+
+    }
+
+    for (int i = 0; i < currSize; i++) {
+        int maxCount = INT_MIN;
+        int index = 0;
+        for (int j = 0; j < prevSize; j++) {
+            if (matchMatrix[i][j] > maxCount) {
+                maxCount = matchMatrix[i][j];
+                index = j;
+            }
+        }
+        bbBestMatches[i] = index;
     }
 
 
