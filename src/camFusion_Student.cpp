@@ -154,17 +154,24 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
 
     // find closest distance to Lidar points within ego lane
     double minXPrev = 1e9, minXCurr = 1e9;
+    double minXPrevSize = 0;
+    double minXCurrSize = 0;
+    
     for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
     {	
-      	if (it->y < 2 && it->y > -2 && it->r > 0.1) {
+      	if (std::abs(it->y) <= (laneWidth/2.0)) {
         	minXPrev = minXPrev > it->x ? it->x : minXPrev;
+            minXPrevSize++;
+            minXPrev = minXPrev/minXPrevSize;
         }
      }
 
     for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
     {	
-      	if (it->y < 2 && it->y > -2 && it->r > 0.1) {
+      	if (std::abs(it->y) <= (laneWidth/2.0)) {
         	minXCurr = minXCurr > it->x ? it->x : minXCurr;
+            minXCurrSize++;
+            minXCurr = minXCurr/minXCurrSize;
         }
     }
 
