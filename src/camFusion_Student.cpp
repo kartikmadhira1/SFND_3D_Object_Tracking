@@ -164,7 +164,7 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
 
     for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
     {	
-      	if (std::abs(it->y) <= (laneWidth/2.0)) {
+      	if (std::abs(it->y) <= (laneWidth/2.0) && std::abs(it->y) > -(laneWidth/2.0)) {
         	minXPrev = minXPrev > it->x ? it->x : minXPrev;
             minXPrevSize++;
             // minXPrev = minXPrev/minXPrevSize;
@@ -174,7 +174,7 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
 
     for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
     {	
-      	if (std::abs(it->y) <= (laneWidth/2.0)) {
+      	if (std::abs(it->y) <= (laneWidth/2.0) && std::abs(it->y) > -(laneWidth/2.0)) {
         	minXCurr = minXCurr > it->x ? it->x : minXCurr;
             minXCurrSize++;
         }
