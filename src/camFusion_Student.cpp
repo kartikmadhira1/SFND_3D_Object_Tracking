@@ -149,7 +149,7 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
     
     }
     float meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
-    float threshold = 0.8*meanDist;
+    float threshold = 0.5*meanDist;
 
     for (auto eachRoiMatch : kptsRoi) {
         if (eachRoiMatch.distance < threshold) {
