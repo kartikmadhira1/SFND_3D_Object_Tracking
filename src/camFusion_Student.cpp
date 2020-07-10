@@ -134,27 +134,47 @@ void show3DObjects(std::vector<BoundingBox> &boundingBoxes, cv::Size worldSize, 
 void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint> &kptsPrev,
                         std::vector<cv::KeyPoint> &kptsCurr, std::vector<cv::DMatch> &kptMatches) {
 
-    // Iterate through the keypoint matches and check if the corresponding 
-    // trainId pt in kptsCurr falls in the ROI of the BB
-    std::vector<cv::DMatch> kptsRoi;
-    std::vector<double> accDistances;
-    for (auto eachMatch : kptMatches) {
+    // // Iterate through the keypoint matches and check if the corresponding 
+    // // trainId pt in kptsCurr falls in the ROI of the BB
+    // std::vector<cv::DMatch> kptsRoi;
+    // std::vector<double> accDistances;
+    // for (auto eachMatch : kptMatches) {
         
-        cv::KeyPoint kpt = kptsCurr[eachMatch.trainIdx];
+    //     cv::KeyPoint kpt = kptsCurr[eachMatch.trainIdx];
 
-        if (boundingBox.roi.contains(cv::Point(kpt.pt.x, kpt.pt.y))) {
-            kptsRoi.push_back(eachMatch);
-            accDistances.push_back(eachMatch.distance);
-        }
+    //     if (boundingBox.roi.contains(cv::Point(kpt.pt.x, kpt.pt.y))) {
+    //         kptsRoi.push_back(eachMatch);
+    //         accDistances.push_back(eachMatch.distance);
+    //     }
     
-    }
-    long  meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
-    double threshold = 0.7*meanDist;
+    // }
+    // long  meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
+    // double threshold = 0.7*meanDist;
 
-    for (auto eachRoiMatch : kptsRoi) {
-        if (eachRoiMatch.distance < threshold) {
-            boundingBox.kptMatches.push_back(eachRoiMatch);
-        }
+    // for (auto eachRoiMatch : kptsRoi) {
+    //     if (eachRoiMatch.distance < threshold) {
+    //         boundingBox.kptMatches.push_back(eachRoiMatch);
+    //     }
+    // }
+    double dist_mean = 0;
+    std::vector<cv::DMatch>  kptMatches_roi;
+    for (auto it = kptMatches.begin(); it != kptMatches.end(); ++it)
+    {
+        cv::KeyPoint kp = kptsCurr.at(it->trainIdx);
+        if (boundingBox.roi.contains(cv::Point(kp.pt.x, kp.pt.y))) 
+            kptMatches_roi.push_back(*it);
+     }   
+    for  (auto it = kptMatches_roi.begin(); it != kptMatches_roi.end(); ++it)  
+         dist_mean += it->distance; 
+    cout << "Find " << kptMatches_roi.size()  << " matches" << endl;
+    if (kptMatches_roi.size() > 0)
+         dist_mean = dist_mean/kptMatches_roi.size();  
+    else return;    
+    double threshold = dist_mean * 0.7;        
+    for  (auto it = kptMatches_roi.begin(); it != kptMatches_roi.end(); ++it)
+    {
+       if (it->distance < threshold)
+           boundingBox.kptMatches.push_back(*it);
     }
 
 }
