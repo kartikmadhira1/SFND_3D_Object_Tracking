@@ -137,7 +137,7 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
     // Iterate through the keypoint matches and check if the corresponding 
     // trainId pt in kptsCurr falls in the ROI of the BB
     std::vector<cv::DMatch> kptsRoi;
-    std::vector<float> accDistances;
+    std::vector<double> accDistances;
     for (auto eachMatch : kptMatches) {
         
         cv::KeyPoint kpt = kptsCurr[eachMatch.trainIdx];
@@ -148,8 +148,8 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
         }
     
     }
-    float meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
-    float threshold = 0.5*meanDist;
+    long  meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
+    double threshold = 0.7*meanDist;
 
     for (auto eachRoiMatch : kptsRoi) {
         if (eachRoiMatch.distance < threshold) {
