@@ -134,47 +134,27 @@ void show3DObjects(std::vector<BoundingBox> &boundingBoxes, cv::Size worldSize, 
 void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint> &kptsPrev,
                         std::vector<cv::KeyPoint> &kptsCurr, std::vector<cv::DMatch> &kptMatches) {
 
-    // // Iterate through the keypoint matches and check if the corresponding 
-    // // trainId pt in kptsCurr falls in the ROI of the BB
-    // std::vector<cv::DMatch> kptsRoi;
-    // std::vector<double> accDistances;
-    // for (auto eachMatch : kptMatches) {
+    // Iterate through the keypoint matches and check if the corresponding 
+    // trainId pt in kptsCurr falls in the ROI of the BB
+    std::vector<cv::DMatch> kptsRoi;
+    std::vector<double> accDistances;
+    for (auto eachMatch : kptMatches) {
         
-    //     cv::KeyPoint kpt = kptsCurr[eachMatch.trainIdx];
+        cv::KeyPoint kpt = kptsCurr[eachMatch.trainIdx];
 
-    //     if (boundingBox.roi.contains(cv::Point(kpt.pt.x, kpt.pt.y))) {
-    //         kptsRoi.push_back(eachMatch);
-    //         accDistances.push_back(eachMatch.distance);
-    //     }
+        if (boundingBox.roi.contains(cv::Point(kpt.pt.x, kpt.pt.y))) {
+            kptsRoi.push_back(eachMatch);
+            accDistances.push_back(eachMatch.distance);
+        }
     
-    // }
-    // long  meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
-    // double threshold = 0.7*meanDist;
+    }
+    long  meanDist = std::accumulate(accDistances.begin(), accDistances.end(), 0)/accDistances.size();
+    double threshold = 0.7*meanDist;
 
-    // for (auto eachRoiMatch : kptsRoi) {
-    //     if (eachRoiMatch.distance < threshold) {
-    //         boundingBox.kptMatches.push_back(eachRoiMatch);
-    //     }
-    // }
-    double dist_mean = 0;
-    std::vector<cv::DMatch>  kptMatches_roi;
-    for (auto it = kptMatches.begin(); it != kptMatches.end(); ++it)
-    {
-        cv::KeyPoint kp = kptsCurr.at(it->trainIdx);
-        if (boundingBox.roi.contains(cv::Point(kp.pt.x, kp.pt.y))) 
-            kptMatches_roi.push_back(*it);
-     }   
-    for  (auto it = kptMatches_roi.begin(); it != kptMatches_roi.end(); ++it)  
-         dist_mean += it->distance; 
-    cout << "Find " << kptMatches_roi.size()  << " matches" << endl;
-    if (kptMatches_roi.size() > 0)
-         dist_mean = dist_mean/kptMatches_roi.size();  
-    else return;    
-    double threshold = dist_mean * 0.7;        
-    for  (auto it = kptMatches_roi.begin(); it != kptMatches_roi.end(); ++it)
-    {
-       if (it->distance < threshold)
-           boundingBox.kptMatches.push_back(*it);
+    for (auto eachRoiMatch : kptsRoi) {
+        if (eachRoiMatch.distance < threshold) {
+            boundingBox.kptMatches.push_back(eachRoiMatch);
+        }
     }
 
 }
@@ -241,38 +221,75 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
     // double dT = 0.1;        
     // time between two measurements in seconds
     
-    double laneWidth = 4.0; // assumed width of the ego lane
+    // double laneWidth = 4.0; // assumed width of the ego lane
 
-    // find closest distance to Lidar points within ego lane
-    double minXPrev = 1e9, minXCurr = 1e9;
-    double minXPrevSize = 0;
-    double minXCurrSize = 0;
+    // // find closest distance to Lidar points within ego lane
+    // double minXPrev = 1e9, minXCurr = 1e9;
+    // double minXPrevSize = 0;
+    // double minXCurrSize = 0;
     
-    if (!lidarPointsCurr.size() || !lidarPointsPrev.size()) {
-        TTC = NAN;
-        return;
-    }
+    // if (!lidarPointsCurr.size() || !lidarPointsPrev.size()) {
+    //     TTC = NAN;
+    //     return;
+    // }
 
+    // for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
+    // {	
+    //   	if (std::abs(it->y) <= (laneWidth/2.0) && std::abs(it->y) > -(laneWidth/2.0)) {
+    //     	minXPrev = minXPrev > it->x ? it->x : minXPrev;
+    //         minXPrevSize++;
+    //         // minXPrev = minXPrev/minXPrevSize;
+    //     }
+    //  }
+    //  minXPrev = minXPrev = minXPrev/minXPrevSize;
+
+    // for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
+    // {	
+    //   	if (std::abs(it->y) <= (laneWidth/2.0) && std::abs(it->y) > -(laneWidth/2.0)) {
+    //     	minXCurr = minXCurr > it->x ? it->x : minXCurr;
+    //         minXCurrSize++;
+    //     }
+    // }
+    // minXCurr = minXCurr/minXCurrSize;
+    // // compute TTC from both measurements
+    // TTC = minXCurr * (1/frameRate) / (minXPrev - minXCurr);
+double dT = 1 / frameRate;
+    double laneWidth = 4.0; // assumed width of the ego lane
+    vector<double> xPrev, xCurr;
+    // find Lidar points within ego lane
     for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
-    {	
-      	if (std::abs(it->y) <= (laneWidth/2.0) && std::abs(it->y) > -(laneWidth/2.0)) {
-        	minXPrev = minXPrev > it->x ? it->x : minXPrev;
-            minXPrevSize++;
-            // minXPrev = minXPrev/minXPrevSize;
-        }
-     }
-     minXPrev = minXPrev = minXPrev/minXPrevSize;
-
-    for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
-    {	
-      	if (std::abs(it->y) <= (laneWidth/2.0) && std::abs(it->y) > -(laneWidth/2.0)) {
-        	minXCurr = minXCurr > it->x ? it->x : minXCurr;
-            minXCurrSize++;
+    {
+        if (abs(it->y) <= laneWidth / 2.0)
+        { // 3D point within ego lane?
+            xPrev.push_back(it->x);
         }
     }
-    minXCurr = minXCurr/minXCurrSize;
+    for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
+    {
+        if (abs(it->y) <= laneWidth / 2.0)
+        { // 3D point within ego lane?
+            xCurr.push_back(it->x);
+        }
+    }
+    double minXPrev = 0; 
+    double minXCurr = 0;
+    if (xPrev.size() > 0)
+    {  
+       for (auto x: xPrev)
+            minXPrev += x;
+       minXPrev = minXPrev / xPrev.size();
+    }
+    if (xCurr.size() > 0)
+    {  
+       for (auto x: xCurr)
+           minXCurr += x;
+       minXCurr = minXCurr / xCurr.size();
+    }  
     // compute TTC from both measurements
-    TTC = minXCurr * (1/frameRate) / (minXPrev - minXCurr);
+    cout << "minXCurr: " << minXCurr << endl;
+    cout << "minXPrev: " << minXPrev << endl;
+    TTC = minXCurr * dT / (minXPrev - minXCurr);
+
 }
 
 
