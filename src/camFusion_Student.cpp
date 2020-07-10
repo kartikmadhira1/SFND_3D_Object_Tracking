@@ -222,7 +222,6 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
     // find closest distance to Lidar points within ego lane
     double minXPrev = 0, minXCurr = 0;
 
-    
     if (!lidarPointsCurr.size() || !lidarPointsPrev.size()) {
         TTC = NAN;
         return;
@@ -243,10 +242,10 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
         }
     }
     if (!xAccCurr.empty()) {
-        minXCurr = std::accumulate(xAccCurr.begin(), xAccCurr.end(), 0)/xAccCurr.size();
+        minXCurr = std::accumulate(xAccCurr.begin(), xAccCurr.end(), 0.0)/xAccCurr.size();
     }
     if (!xAccPrev.empty()) {
-        minXPrev = std::accumulate(xAccPrev.begin(), xAccPrev.end(), 0)/xAccPrev.size();
+        minXPrev = std::accumulate(xAccPrev.begin(), xAccPrev.end(), 0.0)/xAccPrev.size();
     }
     // compute TTC from both measurements
     TTC = minXCurr * (1/frameRate) / (minXPrev - minXCurr);
