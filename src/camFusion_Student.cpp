@@ -243,8 +243,12 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
               xAccCurr.push_back(it->x);
         }
     }
-    minXCurr = std::accumulate(xAccCurr.begin(), xAccCurr.end(), 0)/xAccCurr.size();
-    minXPrev = std::accumulate(xAccPrev.begin(), xAccPrev.end(), 0)/xAccPrev.size();
+    if (!xAccCurr.empty()) {
+        minXCurr = std::accumulate(xAccCurr.begin(), xAccCurr.end(), 0)/xAccCurr.size();
+    }
+    if (!xAccPrev.empty()) {
+        minXPrev = std::accumulate(xAccPrev.begin(), xAccPrev.end(), 0)/xAccPrev.size();
+    }
     // compute TTC from both measurements
     TTC = minXCurr * (1/frameRate) / (minXPrev - minXCurr);
 }
