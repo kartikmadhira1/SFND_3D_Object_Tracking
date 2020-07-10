@@ -220,9 +220,8 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
     double laneWidth = 4.0; // assumed width of the ego lane
 
     // find closest distance to Lidar points within ego lane
-    double minXPrev = 1e9, minXCurr = 1e9;
-    double minXPrevSize = 0;
-    double minXCurrSize = 0;
+    double minXPrev = 0, minXCurr = 0;
+
     
     if (!lidarPointsCurr.size() || !lidarPointsPrev.size()) {
         TTC = NAN;
