@@ -215,11 +215,7 @@ void computeTTCCamera(std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPo
 
 
 void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
-                     std::vector<LidarPoint> &lidarPointsCurr, double frameRate, double &TTC)
-{
-    // auxiliary variables
-    // double dT = 0.1;        
-    // time between two measurements in seconds
+                     std::vector<LidarPoint> &lidarPointsCurr, double frameRate, double &TTC) {
     
     double laneWidth = 4.0; // assumed width of the ego lane
 
@@ -232,47 +228,30 @@ void computeTTCLidar(std::vector<LidarPoint> &lidarPointsPrev,
         TTC = NAN;
         return;
     }
-
+    vector<double> xAccCurr, xAccPrev;
     for (auto it = lidarPointsPrev.begin(); it != lidarPointsPrev.end(); ++it)
     {	
       	if (std::abs(it->y) <= (laneWidth/2.0)) {
-        	minXPrev = minXPrev > it->x ? it->x : minXPrev;
-            minXPrevSize++;
-            // minXPrev = minXPrev/minXPrevSize;
+              xAccPrev.push_back(it->x);
         }
      }
-     minXPrev = minXPrev = minXPrev/minXPrevSize;
+    //  minXPrev = minXPrev = minXPrev/minXPrevSize;
 
     for (auto it = lidarPointsCurr.begin(); it != lidarPointsCurr.end(); ++it)
     {	
       	if (std::abs(it->y) <= (laneWidth/2.0)) {
-        	minXCurr = minXCurr > it->x ? it->x : minXCurr;
-            minXCurrSize++;
+              xAccCurr.push_back(it->x);
         }
     }
-    minXCurr = minXCurr/minXCurrSize;
-    minXPrev = minXPrev/minXPrevSize;
+    minXCurr = std::accumulate(xAccCurr.begin(), xAccCurr.end(), 0)/xAccCurr.size();
+    minXPrev = std::accumulate(xAccPrev.begin(), xAccPrev.end(), 0)/xAccPrev.size();
     // compute TTC from both measurements
     TTC = minXCurr * (1/frameRate) / (minXPrev - minXCurr);
 }
 
 
 void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bbBestMatches, DataFrame &prevFrame, DataFrame &currFrame) {
-    // For each of the matches between the frames
-    // for (auto &each_match : matches)  {
-    //     // For every frame in the bounding box for current frame
-    //     for (auto &each_box : currFrame.boundingBoxes) {
-    //         if (bbBestMatches.find(each_box.boxID) == bbBestMatches.end()) {
-    //             if (each_box.roi.contains(currFrame.keypoints[each_match.trainIdx].pt)) {
-    //                 for (auto &each_prev_box : prevFrame.boundingBoxes) {
-    //                     if (each_prev_box.roi.contains(prevFrame.keypoints[each_match.queryIdx].pt)) {
-    //                         bbBestMatches[each_box.boxID] = each_prev_box.boxID; 
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }  
+
     int prevSize = prevFrame.boundingBoxes.size();
     int currSize = currFrame.boundingBoxes.size();
 
